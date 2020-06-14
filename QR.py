@@ -46,27 +46,33 @@ def generate_qr():
     now = str(now).replace(".", "-")
     os.mkdir(now)
     with open('QR_list.txt') as file:
-        for line in file:
-            qr = qrcode.QRCode(
-                version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_H,
-                box_size=size,
-                border=1,
-            )
-            link = line.split(",")[0].rstrip('\n')
-            qr.add_data(link)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="#202952", back_color="#FFFFFF").convert('RGB')
+        x = len(file.readlines())
+        printProgressBar(0, x, prefix='Progress:', suffix='Complete', length=50)
+        file.seek(0)
+        with alive_bar(x) as bar:
+            for i, line in enumerate(file):
+                printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
+                bar()
+                qr = qrcode.QRCode(
+                    version=1,
+                    error_correction=qrcode.constants.ERROR_CORRECT_H,
+                    box_size=size,
+                    border=1,
+                )
+                link = line.split(",")[0].rstrip('\n')
+                qr.add_data(link)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color="#202952", back_color="#FFFFFF").convert('RGB')
 
-            if alaa_logo_on:
-                logo = Image.open('logo.png')
-                ratio = alaa_logo_ratio / 100
-                out = tuple([int(ratio * s) for s in img.size])
-                logo = logo.resize(out, Image.ANTIALIAS)
-                pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
-                img.paste(logo, pos, logo)
-            name = str(os.path.join(now, os.path.basename(link))) + '.png'
-            img.save(name)
+                if alaa_logo_on:
+                    logo = Image.open('logo.png')
+                    ratio = alaa_logo_ratio / 100
+                    out = tuple([int(ratio * s) for s in img.size])
+                    logo = logo.resize(out, Image.ANTIALIAS)
+                    pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+                    img.paste(logo, pos, logo)
+                name = str(os.path.join(now, os.path.basename(link))) + '.png'
+                img.save(name)
 
 
 def pdf():
@@ -77,7 +83,6 @@ def pdf():
         input_file = PdfFileReader(inpt)
         page_count = input_file.getNumPages()
         with alive_bar(page_count) as bar:
-
             page_list = [x.split(",")[1] for x in txt]
             url_list = [x.split(",")[0] for x in txt]
             file_name = "water.pdf"
@@ -85,6 +90,7 @@ def pdf():
             printProgressBar(0, page_count, prefix='Progress:', suffix='Complete', length=50)
             for i, page_number in enumerate(range(page_count)):
                 printProgressBar(i + 1, page_count, prefix='Progress:', suffix='Complete', length=50)
+                bar()
                 if str(page_number) in page_list:
                     link = url_list[page_list.index(str(page_number))]
 
@@ -110,9 +116,8 @@ def pdf():
 
                     with open("output.pdf", "wb") as outputStream:
                         output_file.write(outputStream)
-                bar()
 
-            os.remove(file_name)
+    os.remove(file_name)
 
 
 if __name__ == "__main__":
