@@ -1,18 +1,15 @@
+import os
+from datetime import datetime
+
 import qrcode
 from PIL import Image
-from datetime import datetime
-import time
-import psutil
-import hashlib
-import os
+from PyPDF4 import PdfFileWriter, PdfFileReader
 from reportlab.pdfgen import canvas
-from PyPDF2 import PdfFileWriter, PdfFileReader
 
 
 def config():
-    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, base_url
-    base_url = 'https://alaatv.com/c/'
-    size = int(input("output size [5 to 500 default is 20] ? : ") or 20)
+    global size, pdf_on, alaa_logo_on, alaa_logo_ratio
+    size = int(input("output size [5 to 500 default is 3] ? : ") or 3)
     pdf_on = int(input("pdf wil be generated [0 or 1 default is 0][input file is input.pdf] ? : ") or 1)
     alaa_logo_on = int(input("is Alaa logo on [0 or 1 default is 0] ? : ") or 0)
     if alaa_logo_on:
@@ -33,8 +30,7 @@ def generate_qr():
                 box_size=size,
                 border=1,
             )
-            link = base_url + line.split(",")[0].rstrip('\n')
-            print()
+            link = line.split(",")[0].rstrip('\n')
             qr.add_data(link)
             qr.make(fit=True)
             img = qr.make_image(fill_color="#202952", back_color="#FFFFFF").convert('RGB')
@@ -52,38 +48,43 @@ def generate_qr():
 
 def pdf():
     with open('QR_list.txt') as file:
-        output_file = PdfFileWriter()
-        with open("input.pdf", "rb") as inpt:
-            input_file = PdfFileReader(inpt)
-            # page_count = input_file.getNumPages()
-            # print(file.readlines())
-            # page_list = [x.split(",")[1].rstrip('\n') for x in file.readlines()]
-            # print(page_list)
-            # exit()
-            # for page_number in range(page_count):
-            for line in file:
-                # temp_name = hashlib.md5(line.encode()).hexdigest() + '.pdf'
-                link = base_url + line.split(",")[0].rstrip('\n')
-                file_name = "water.pdf"
+        txt = [x.rstrip("\n") for x in file.readlines()]
+    output_file = PdfFileWriter()
+    with open("input.pdf", "rb") as inpt:
+        input_file = PdfFileReader(inpt)
+        page_count = input_file.getNumPages()
+
+        page_list = [x.split(",")[1] for x in txt]
+        url_list = [x.split(",")[0] for x in txt]
+        file_name = "water.pdf"
+        for page_number in range(page_count):
+
+            if str(page_number) in page_list:
+                link = url_list[page_list.index(str(page_number))]
+
                 c = canvas.Canvas(file_name)
-                c.drawImage(str(os.path.join(now, line.split(",")[0].rstrip('\n'))) + ".png", 525, 772, 70, 70)
+                c.drawImage(
+                    str(os.path.join(now, os.path.basename(link))) + ".png",
+                    525, 772,
+                    70, 70)
                 c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
                 c.save()
-                with open("water.pdf", "rb") as water:
-                    watermark = PdfFileReader(water)
 
-                    page_number = int(line.split(",")[1].rstrip('\n')) +1
+                with open(file_name, "rb") as water:
+                    watermark = PdfFileReader(water)
                     input_page = input_file.getPage(page_number)
                     input_page.mergePage(watermark.getPage(0))
                     output_file.addPage(input_page)
-                os.remove("water.pdf")
+                    with open("output.pdf", "wb") as outputStream:
+                        output_file.write(outputStream)
 
-            # finally, write "output" to output.pdf
-            with open("output.pdf", "wb") as outputStream:
-                output_file.write(outputStream)
+            else:
+                input_page = input_file.getPage(page_number)
+                output_file.addPage(input_page)
 
-        # os.remove("temp.pdf")
-    # temp.close()
+                with open("output.pdf", "wb") as outputStream:
+                    output_file.write(outputStream)
+        os.remove(file_name)
 
 
 if __name__ == "__main__":
@@ -91,5 +92,3 @@ if __name__ == "__main__":
     generate_qr()
     if pdf_on:
         pdf()
-        # proc = psutil.Process()
-        # print(proc.open_files())
