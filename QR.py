@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-
 import qrcode
 from PIL import Image
 from PyPDF4 import PdfFileWriter, PdfFileReader
@@ -83,7 +82,7 @@ def pdf():
         input_file = PdfFileReader(inpt)
         page_count = input_file.getNumPages()
         with alive_bar(page_count) as bar:
-            page_list = [x.split(",")[1] for x in txt]
+            page_list = [str(int(x.split(",")[1]) - 1) for x in txt]
             url_list = [x.split(",")[0] for x in txt]
             file_name = "water.pdf"
 
