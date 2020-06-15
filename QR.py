@@ -1,9 +1,9 @@
 import os
 from datetime import datetime
+
 import qrcode
 from PIL import Image
 from PyPDF4 import PdfFileWriter, PdfFileReader
-from alive_progress import alive_bar
 from reportlab.pdfgen import canvas
 
 
@@ -23,7 +23,7 @@ def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
+    print('\r\n%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
     # Print New Line on Complete
     if iteration == total:
         print()
@@ -48,30 +48,28 @@ def generate_qr():
         x = len(file.readlines())
         printProgressBar(0, x, prefix='Progress:', suffix='Complete', length=50)
         file.seek(0)
-        with alive_bar(x) as bar:
-            for i, line in enumerate(file):
-                printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
-                bar()
-                qr = qrcode.QRCode(
-                    version=1,
-                    error_correction=qrcode.constants.ERROR_CORRECT_H,
-                    box_size=size,
-                    border=1,
-                )
-                link = line.split(",")[0].rstrip('\n')
-                qr.add_data(link)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="#202952", back_color="#FFFFFF").convert('RGB')
+        for i, line in enumerate(file):
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_H,
+                box_size=size,
+                border=1,
+            )
+            link = line.split(",")[0].rstrip('\n')
+            qr.add_data(link)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="#202952", back_color="#FFFFFF").convert('RGB')
 
-                if alaa_logo_on:
-                    logo = Image.open('logo.png')
-                    ratio = alaa_logo_ratio / 100
-                    out = tuple([int(ratio * s) for s in img.size])
-                    logo = logo.resize(out, Image.ANTIALIAS)
-                    pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
-                    img.paste(logo, pos, logo)
-                name = str(os.path.join(now, os.path.basename(link))) + '.png'
-                img.save(name)
+            if alaa_logo_on:
+                logo = Image.open('logo.png')
+                ratio = alaa_logo_ratio / 100
+                out = tuple([int(ratio * s) for s in img.size])
+                logo = logo.resize(out, Image.ANTIALIAS)
+                pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
+                img.paste(logo, pos, logo)
+            name = str(os.path.join(now, os.path.basename(link))) + '.png'
+            img.save(name)
+            printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
 
 
 def pdf():
@@ -81,40 +79,38 @@ def pdf():
     with open("input.pdf", "rb") as inpt:
         input_file = PdfFileReader(inpt)
         page_count = input_file.getNumPages()
-        with alive_bar(page_count) as bar:
-            page_list = [str(int(x.split(",")[1]) - 1) for x in txt]
-            url_list = [x.split(",")[0] for x in txt]
-            file_name = "water.pdf"
+        page_list = [str(int(x.split(",")[1]) - 1) for x in txt]
+        url_list = [x.split(",")[0] for x in txt]
+        file_name = "water.pdf"
 
-            printProgressBar(0, page_count, prefix='Progress:', suffix='Complete', length=50)
-            for i, page_number in enumerate(range(page_count)):
-                printProgressBar(i + 1, page_count, prefix='Progress:', suffix='Complete', length=50)
-                bar()
-                if str(page_number) in page_list:
-                    link = url_list[page_list.index(str(page_number))]
+        printProgressBar(0, page_count, prefix='Progress:', suffix='Complete', length=50)
+        for i, page_number in enumerate(range(page_count)):
+            if str(page_number) in page_list:
+                link = url_list[page_list.index(str(page_number))]
 
-                    c = canvas.Canvas(file_name)
-                    c.drawImage(
-                        str(os.path.join(now, os.path.basename(link))) + ".png",
-                        525, 772,
-                        70, 70)
-                    c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
-                    c.save()
+                c = canvas.Canvas(file_name)
+                c.drawImage(
+                    str(os.path.join(now, os.path.basename(link))) + ".png",
+                    525, 772,
+                    70, 70)
+                c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
+                c.save()
 
-                    with open(file_name, "rb") as water:
-                        watermark = PdfFileReader(water)
-                        input_page = input_file.getPage(page_number)
-                        input_page.mergePage(watermark.getPage(0))
-                        output_file.addPage(input_page)
-                        with open("output.pdf", "wb") as outputStream:
-                            output_file.write(outputStream)
-
-                else:
+                with open(file_name, "rb") as water:
+                    watermark = PdfFileReader(water)
                     input_page = input_file.getPage(page_number)
+                    input_page.mergePage(watermark.getPage(0))
                     output_file.addPage(input_page)
-
                     with open("output.pdf", "wb") as outputStream:
                         output_file.write(outputStream)
+
+            else:
+                input_page = input_file.getPage(page_number)
+                output_file.addPage(input_page)
+
+                with open("output.pdf", "wb") as outputStream:
+                    output_file.write(outputStream)
+            printProgressBar(i + 1, page_count, prefix='Progress:', suffix='Complete', length=50)
 
     os.remove(file_name)
 
