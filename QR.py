@@ -4,29 +4,32 @@ from datetime import datetime
 import qrcode
 from PIL import Image
 from PyPDF4 import PdfFileWriter, PdfFileReader
+from progress.bar import Bar
 from reportlab.pdfgen import canvas
 
 
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r\n%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
-    # Print New Line on Complete
-    if iteration == total:
-        print()
+# def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+#     """
+#     Call in a loop to create terminal progress bar
+#     @params:
+#         iteration   - Required  : current iteration (Int)
+#         total       - Required  : total iterations (Int)
+#         prefix      - Optional  : prefix string (Str)
+#         suffix      - Optional  : suffix string (Str)
+#         decimals    - Optional  : positive number of decimals in percent complete (Int)
+#         length      - Optional  : character length of bar (Int)
+#         fill        - Optional  : bar fill character (Str)
+#         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+#     """
+#     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+#     filledLength = int(length * iteration // total)
+#     bar = fill * filledLength + '-' * (length - filledLength)
+#     print('\r\n%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
+#     # Print New Line on Complete
+#     if iteration == total:
+#         print()
+# printProgressBar(0, x, prefix='Progress:', suffix='Complete', length=50)
+# printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
 
 
 def config():
@@ -45,8 +48,7 @@ def generate_qr():
     now = str(now).replace(".", "-")
     os.mkdir(now)
     with open('QR_list.txt') as file:
-        x = len(file.readlines())
-        printProgressBar(0, x, prefix='Progress:', suffix='Complete', length=50)
+        bar = Bar('Processing', max=len(file.readlines()))
         file.seek(0)
         for i, line in enumerate(file):
             qr = qrcode.QRCode(
@@ -69,7 +71,8 @@ def generate_qr():
                 img.paste(logo, pos, logo)
             name = str(os.path.join(now, os.path.basename(link))) + '.png'
             img.save(name)
-            printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
+            bar.next()
+        bar.finish()
 
 
 def pdf():
@@ -82,8 +85,7 @@ def pdf():
         page_list = [str(int(x.split(",")[1]) - 1) for x in txt]
         url_list = [x.split(",")[0] for x in txt]
         file_name = "water.pdf"
-
-        printProgressBar(0, page_count, prefix='Progress:', suffix='Complete', length=50)
+        bar = Bar('Processing', max=page_count)
         for i, page_number in enumerate(range(page_count)):
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))]
@@ -110,7 +112,8 @@ def pdf():
 
                 with open("output.pdf", "wb") as outputStream:
                     output_file.write(outputStream)
-            printProgressBar(i + 1, page_count, prefix='Progress:', suffix='Complete', length=50)
+            bar.next()
+        bar.finish()
 
     os.remove(file_name)
 
