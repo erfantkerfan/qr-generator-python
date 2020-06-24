@@ -8,30 +8,6 @@ from progress.bar import Bar
 from reportlab.pdfgen import canvas
 
 
-# def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
-#     """
-#     Call in a loop to create terminal progress bar
-#     @params:
-#         iteration   - Required  : current iteration (Int)
-#         total       - Required  : total iterations (Int)
-#         prefix      - Optional  : prefix string (Str)
-#         suffix      - Optional  : suffix string (Str)
-#         decimals    - Optional  : positive number of decimals in percent complete (Int)
-#         length      - Optional  : character length of bar (Int)
-#         fill        - Optional  : bar fill character (Str)
-#         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-#     """
-#     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-#     filledLength = int(length * iteration // total)
-#     bar = fill * filledLength + '-' * (length - filledLength)
-#     print('\r\n%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
-#     # Print New Line on Complete
-#     if iteration == total:
-#         print()
-# printProgressBar(0, x, prefix='Progress:', suffix='Complete', length=50)
-# printProgressBar(i + 1, x, prefix='Progress:', suffix='Complete', length=50)
-
-
 def config():
     global size, pdf_on, alaa_logo_on, alaa_logo_ratio
     size = int(input("output size [5 to 500 default is 20] ? : ") or 20)
@@ -69,7 +45,7 @@ def generate_qr():
                 logo = logo.resize(out, Image.ANTIALIAS)
                 pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
                 img.paste(logo, pos, logo)
-            name = str(os.path.join(now, os.path.basename(link))) + '.png'
+            name = str(os.path.join(now, os.path.basename(link.split("?")[0]))) + '.png'
             img.save(name)
             bar.next()
         bar.finish()
@@ -92,7 +68,7 @@ def pdf():
 
                 c = canvas.Canvas(file_name)
                 c.drawImage(
-                    str(os.path.join(now, os.path.basename(link))) + ".png",
+                    str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png",
                     525, 772,
                     70, 70)
                 c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
