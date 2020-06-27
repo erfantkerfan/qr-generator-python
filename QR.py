@@ -65,15 +65,10 @@ def pdf():
         for i, page_number in enumerate(range(page_count)):
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))]
-
                 c = canvas.Canvas(file_name)
-                c.drawImage(
-                    str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png",
-                    525, 772,
-                    70, 70)
+                c.drawImage(str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png", 525, 772, 70, 70)
                 c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
                 c.save()
-
                 with open(file_name, "rb") as water:
                     watermark = PdfFileReader(water)
                     input_page = input_file.getPage(page_number)
@@ -81,16 +76,13 @@ def pdf():
                     output_file.addPage(input_page)
                     with open("output.pdf", "wb") as outputStream:
                         output_file.write(outputStream)
-
             else:
                 input_page = input_file.getPage(page_number)
                 output_file.addPage(input_page)
-
                 with open("output.pdf", "wb") as outputStream:
                     output_file.write(outputStream)
             bar.next()
         bar.finish()
-
     os.remove(file_name)
 
 
