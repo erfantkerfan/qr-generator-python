@@ -9,9 +9,11 @@ from reportlab.pdfgen import canvas
 
 
 def config():
-    global size, pdf_on, alaa_logo_on, alaa_logo_ratio
+    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, letter
     size = int(input("output size [5 to 500 default is 20] ? : ") or 20)
     pdf_on = int(input("pdf wil be generated [0 or 1 default is 0][input file is input.pdf] ? : ") or 0)
+    if pdf_on:
+        letter = int(input("pdf is letter size [0 or 1 default is 0] ? : ") or 0)
     alaa_logo_on = int(input("is Alaa logo on [0 or 1 default is 0] ? : ") or 0)
     if alaa_logo_on:
         alaa_logo_ratio = int(input("Alaa logo ratio size [1 to 100 default is 35] ? : ") or 35)
@@ -66,8 +68,12 @@ def pdf():
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))]
                 c = canvas.Canvas(file_name)
-                c.drawImage(str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png", 525, 772, 70, 70)
-                c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
+                if letter:
+                    c.drawImage(str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png", 528, 741, 65, 65)
+                    c.linkURL(link, [528, 741, 528 + 65, 741 + 65], )
+                else:
+                    c.drawImage(str(os.path.join(now, os.path.basename(link.split("?")[0]))) + ".png", 525, 772, 70, 70)
+                    c.linkURL(link, [525, 772, 525 + 70, 772 + 70], )
                 c.save()
                 with open(file_name, "rb") as water:
                     watermark = PdfFileReader(water)
