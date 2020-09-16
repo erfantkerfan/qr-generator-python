@@ -1,2 +1,4 @@
 .idea
 .env
+*.pdf
+QR_list.txt
