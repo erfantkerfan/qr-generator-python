@@ -190,6 +190,6 @@ if __name__ == '__main__':
     else:
         tt = threading.Thread(target=waiting)
         tt.start()
-
+        update()
         root.quit()
         os._exit(0)
