@@ -11,25 +11,45 @@ import qrcode
 from PIL import Image
 from PyPDF4 import PdfFileWriter, PdfFileReader
 from dotenv import load_dotenv
+from pick import pick
 from progress.bar import Bar
 from reportlab.pdfgen import canvas
 
+VERSION = '2.1.0'
 
+
+# get initialising values from user via console
 def config():
     global size, pdf_on, alaa_logo_on, alaa_logo_ratio, type
+    # size of the image (represents quality)
     size = int(input('output size [5 to 500 default is 20] ? : ') or 20)
+    # pdf will be generated or not
     pdf_on = int(input('pdf wil be generated [0 or 1 default is 0][input file is input.pdf] ? : ') or 0)
     if pdf_on:
-        user_input = input('pdf type [Arash or Letter or Free default is Free] ? : ') or 'free'
+        # ToDo: delete this legacy code
+        # user_input = input('pdf type [Arash or Letter or Free default is Free] ? : ') or 'free'
+        # type of pdf (represents the placement of qr-code)
+        # type = [k for k in MAP.keys() if user_input.lower() in MAP[k]][0]
 
-        type = [k for k in MAP.keys() if user_input.lower() in MAP[k]][0]
+        title = 'Please choose your type of pamphlet'
+        options = [
+            {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
+            {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
+            {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
+        ]
+        _, index = pick([option['name'] for option in options], title)
+        type = options[index]
+        print(type, index)
+    # logo is printed on qr-code or not
     alaa_logo_on = int(input('is Alaa logo on [0 or 1 default is 0] ? : ') or 0)
     if alaa_logo_on:
+        # percent used by logo on qr-code
         alaa_logo_ratio = int(input('Alaa logo ratio size [1 to 100 default is 35] ? : ') or 35)
 
 
 def generate_qr():
     global now
+    # used for naming folders
     now = datetime.now()
     now = str(now).replace(':', '-')
     now = str(now).replace('.', '-')
@@ -65,30 +85,23 @@ def generate_qr():
 def pdf():
     with open(QR_CODE_LIST_FILE) as file:
         txt = [x.rstrip('\n') for x in file.readlines()]
+    # generate empty pdf file
     output_file = PdfFileWriter()
     with open(INPUT_PDF_FILE, 'rb') as inpt:
         input_file = PdfFileReader(inpt)
         page_count = input_file.getNumPages()
         page_list = [str(int(x.split(',')[1]) - 1) for x in txt]
         url_list = [x.split(',')[0] for x in txt]
+        # temp pdf file for processing single page (deleted afterward)
         file_name = 'water.pdf'
         bar = Bar('Processing', max=page_count)
         for i, page_number in enumerate(range(page_count)):
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))]
                 c = canvas.Canvas(file_name)
-                if type == 'Letter':
-                    dimension = 65
-                    width = 528
-                    height = 741
-                elif type == 'Arash':
-                    dimension = 70
-                    width = 525
-                    height = 772
-                elif type == 'Free':
-                    dimension = 70
-                    width = 0
-                    height = 0
+                dimension = type['dimension']
+                width = type['width']
+                height = type['height']
                 c.drawImage(str(os.path.join(now, os.path.basename(link.split('?')[0]))) + '.png', width, height,
                             dimension, dimension)
                 c.linkURL(link, [width, height, width + dimension, height + dimension], )
@@ -110,6 +123,7 @@ def pdf():
     os.remove(file_name)
 
 
+# update the code with github
 def update():
     command = 'git fetch --all'
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
@@ -133,6 +147,7 @@ def update():
                 reload(updated=True)
 
 
+# show update progress bar
 def waiting():
     global root
 
@@ -159,6 +174,7 @@ def waiting():
     root.mainloop()
 
 
+# reload the app with needed sys arguments
 def reload(updated=False):
     if updated:
         os.execv(sys.executable, ['python ' + str(__file__) + ' updated'])
@@ -167,6 +183,7 @@ def reload(updated=False):
 
 
 if __name__ == '__main__':
+    # set up initial variables
     MAP = {
         'Arash': ['1', 'arash', 'a', 'ar'],
         'Letter': ['2', 'letter', 'l', 'le'],
@@ -175,13 +192,12 @@ if __name__ == '__main__':
     QR_CODE_LIST_FILE = 'QR_list.txt'
     OUTPUT_PDF_FILE = 'output.pdf'
     INPUT_PDF_FILE = 'input.pdf'
-
-    VERSION = '2.0.0'
     load_dotenv()
     DEBUG = bool(os.getenv("DEBUG"))
     GIT_REMOTE = os.getenv("GIT_REMOTE")
     GIT_BRANCH = os.getenv("GIT_BRANCH")
 
+    # answer if is update needed?
     if DEBUG or (len(sys.argv) > 1 and sys.argv[1] == 'updated'):
         config()
         generate_qr()
