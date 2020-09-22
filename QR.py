@@ -20,7 +20,7 @@ VERSION = '2.1.0'
 
 # get initialising values from user via console
 def config():
-    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, type
+    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, selected_option
     # size of the image (represents quality)
     size = int(input('output size [5 to 500 default is 20] ? : ') or 20)
     # pdf will be generated or not
@@ -38,8 +38,7 @@ def config():
             {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
         ]
         _, index = pick([option['name'] for option in options], title)
-        type = options[index]
-        print(type, index)
+        selected_option = options[index]
     # logo is printed on qr-code or not
     alaa_logo_on = int(input('is Alaa logo on [0 or 1 default is 0] ? : ') or 0)
     if alaa_logo_on:
@@ -99,9 +98,9 @@ def pdf():
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))]
                 c = canvas.Canvas(file_name)
-                dimension = type['dimension']
-                width = type['width']
-                height = type['height']
+                dimension = selected_option['dimension']
+                width = selected_option['width']
+                height = selected_option['height']
                 c.drawImage(str(os.path.join(now, os.path.basename(link.split('?')[0]))) + '.png', width, height,
                             dimension, dimension)
                 c.linkURL(link, [width, height, width + dimension, height + dimension], )
