@@ -33,9 +33,9 @@ def config():
 
         title = 'Please choose your type of pamphlet'
         options = [
-            {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
-            {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
             {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
+            {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
+            {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
         ]
         _, index = pick([option['name'] for option in options], title)
         selected_option = options[index]
