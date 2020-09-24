@@ -16,34 +16,50 @@ from progress.bar import Bar
 from reportlab.pdfgen import canvas
 
 VERSION = '2.1.0'
+PLACEMENT_OPTIONS = [
+    {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
+    {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
+    {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
+]
+UTM_OPTIONS = [
+    {'name': 'None', 'utm_link': ''},
+    {'name': 'abrisham', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=abrisham'},
+    {'name': 'nooshdaru', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=nooshdaru'},
+    {'name': 'arash', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=arash'},
+]
+SIZE_OPTIONS = [20, 5, 50, 100, 200, 300, 400]
+PERCENT_OPTIONS = [35, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 
 # get initialising values from user via console
 def config():
-    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, selected_option
+    global size, pdf_on, alaa_logo_on, alaa_logo_ratio, placement, utm_link
     # size of the image (represents quality)
-    size = int(input('output size [5 to 500 default is 20] ? : ') or 20)
-    # pdf will be generated or not
-    pdf_on = int(input('pdf wil be generated [0 or 1 default is 0][input file is input.pdf] ? : ') or 0)
-    if pdf_on:
-        # ToDo: delete this legacy code
-        # user_input = input('pdf type [Arash or Letter or Free default is Free] ? : ') or 'free'
-        # type of pdf (represents the placement of qr-code)
-        # type = [k for k in MAP.keys() if user_input.lower() in MAP[k]][0]
+    title = 'Please your QUALITY of image output :'
+    size, index = pick(SIZE_OPTIONS, title)
 
-        title = 'Please choose your type of pamphlet'
-        options = [
-            {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
-            {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
-            {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
-        ]
-        _, index = pick([option['name'] for option in options], title)
-        selected_option = options[index]
+    # select utm link
+    title = 'Please choose your UTM term:'
+    _, index = pick([option['name'] for option in UTM_OPTIONS], title)
+    utm_link = UTM_OPTIONS[index]['utm_link']
+
     # logo is printed on qr-code or not
-    alaa_logo_on = int(input('is Alaa logo on [0 or 1 default is 0] ? : ') or 0)
+    title = 'Do you want AlaaTv LOGO ?'
+    alaa_logo_on, index = pick([1, 0], title)
+
+    # percent used by logo on qr-code
     if alaa_logo_on:
-        # percent used by logo on qr-code
-        alaa_logo_ratio = int(input('Alaa logo ratio size [1 to 100 default is 35] ? : ') or 35)
+        title = 'Please space used by LOGO in image in percent(%) :'
+        alaa_logo_ratio, index = pick(PERCENT_OPTIONS, title)
+
+    # pdf will be generated or not
+    title = 'Do you want PDF version ?'
+    pdf_on, index = pick([1, 0], title)
+
+    if pdf_on:
+        title = 'Please choose your type of PAMPHLET :'
+        _, index = pick([option['name'] for option in PLACEMENT_OPTIONS], title)
+        placement = PLACEMENT_OPTIONS[index]
 
 
 def generate_qr():
@@ -63,8 +79,8 @@ def generate_qr():
                 box_size=size,
                 border=1,
             )
-            link = line.split(',')[0].rstrip('\n')
-            qr.add_data(link)
+            link = line.split(',')[0].rstrip('\n').split('?')[0]
+            qr.add_data(link + utm_link)
             qr.make(fit=True)
             img = qr.make_image(fill_color='#202952', back_color='#FFFFFF').convert('RGB')
 
@@ -75,7 +91,7 @@ def generate_qr():
                 logo = logo.resize(out, Image.ANTIALIAS)
                 pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
                 img.paste(logo, pos, logo)
-            name = str(os.path.join(now, os.path.basename(link.split('?')[0]))) + '.png'
+            name = str(os.path.join(now, os.path.basename(link))) + '.png'
             img.save(name)
             bar.next()
         bar.finish()
@@ -96,14 +112,14 @@ def pdf():
         bar = Bar('Processing', max=page_count)
         for i, page_number in enumerate(range(page_count)):
             if str(page_number) in page_list:
-                link = url_list[page_list.index(str(page_number))]
+                link = url_list[page_list.index(str(page_number))].split('?')[0]
                 c = canvas.Canvas(file_name)
-                dimension = selected_option['dimension']
-                width = selected_option['width']
-                height = selected_option['height']
-                c.drawImage(str(os.path.join(now, os.path.basename(link.split('?')[0]))) + '.png', width, height,
+                dimension = placement['dimension']
+                width = placement['width']
+                height = placement['height']
+                c.drawImage(str(os.path.join(now, os.path.basename(link))) + '.png', width, height,
                             dimension, dimension)
-                c.linkURL(link, [width, height, width + dimension, height + dimension], )
+                c.linkURL(link + utm_link, [width, height, width + dimension, height + dimension], )
                 c.save()
                 with open(file_name, 'rb') as water:
                     watermark = PdfFileReader(water)
@@ -183,11 +199,6 @@ def reload(updated=False):
 
 if __name__ == '__main__':
     # set up initial variables
-    MAP = {
-        'Arash': ['1', 'arash', 'a', 'ar'],
-        'Letter': ['2', 'letter', 'l', 'le'],
-        'Free': ['3', 'free', 'fr', 'f']
-    }
     QR_CODE_LIST_FILE = 'QR_list.txt'
     OUTPUT_PDF_FILE = 'output.pdf'
     INPUT_PDF_FILE = 'input.pdf'
