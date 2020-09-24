@@ -179,7 +179,7 @@ def waiting():
     root.resizable(height=None, width=None)
     root.iconbitmap(default=os.path.join(os.getcwd(), 'alaa.ico'))
     # root.protocol('WM_DELETE_WINDOW', root.iconify)
-    root.title('Alaa studio app')
+    root.title('Alaa QR-code app')
     update_title = tk.Label(root, text='در حال بروزرسانی از اینترنت')
     update_title.pack(pady=20)
     progress_bar = ttk.Progressbar(root, orient=tk.HORIZONTAL, length=200, mode='determinate')
