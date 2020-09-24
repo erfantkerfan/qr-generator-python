@@ -34,6 +34,7 @@ PERCENT_OPTIONS = [35, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 # get initialising values from user via console
 def config():
     global size, pdf_on, alaa_logo_on, alaa_logo_ratio, placement, utm_link
+
     # size of the image (represents quality)
     title = 'Please your QUALITY of image output :'
     size, index = pick(SIZE_OPTIONS, title)
