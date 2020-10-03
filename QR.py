@@ -18,6 +18,7 @@ from reportlab.pdfgen import canvas
 VERSION = '2.1.0'
 PLACEMENT_OPTIONS = [
     {'name': 'Abrisham', 'dimension': 70, 'width': 0, 'height': 0},
+    {'name': 'Fadaee Fard', 'dimension': 70, 'width': 0, 'height': 741},
     {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
     {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
     {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
