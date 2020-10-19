@@ -207,8 +207,8 @@ if __name__ == '__main__':
     INPUT_PDF_FILE = 'input.pdf'
     load_dotenv()
     DEBUG = bool(os.getenv("DEBUG"))
-    GIT_REMOTE = os.getenv("GIT_REMOTE")
-    GIT_BRANCH = os.getenv("GIT_BRANCH")
+    GIT_REMOTE = 'production'
+    GIT_BRANCH = 'master'
 
     # answer if is update needed?
     if DEBUG or (len(sys.argv) > 1 and sys.argv[1] == 'updated'):
