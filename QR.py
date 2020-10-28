@@ -143,10 +143,6 @@ def pdf():
 
 # update the code with github
 def update():
-    command0 = 'git remote set-url production https://github.com/erfantkerfan/qr-generator-python'
-    process0 = subprocess.Popen(command0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-    status0 = process0.wait()
-
     command = 'git fetch --all'
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     status = process.wait()
