@@ -12,7 +12,6 @@ from PIL import Image
 from PyPDF4 import PdfFileWriter, PdfFileReader
 from dotenv import load_dotenv
 from pick import pick
-from progress.bar import Bar
 from reportlab.pdfgen import canvas
 
 VERSION = '2.1.0'
@@ -73,7 +72,7 @@ def generate_qr():
     now = str(now).replace('.', '-')
     os.mkdir(now)
     with open(QR_CODE_LIST_FILE) as file:
-        bar = Bar('Processing', max=len(file.readlines()))
+        bar = tqdm(total=len(file.readlines()), desc='pic', unit='pic')
         file.seek(0)
         for i, line in enumerate(file):
             qr = qrcode.QRCode(
@@ -96,8 +95,8 @@ def generate_qr():
                 img.paste(logo, pos, logo)
             name = str(os.path.join(now, os.path.basename(link))) + '.png'
             img.save(name)
-            bar.next()
-        bar.finish()
+            bar.update(1)
+        bar.close()
 
 
 def pdf():
@@ -112,7 +111,7 @@ def pdf():
         url_list = [x.split(',')[0] for x in txt]
         # temp pdf file for processing single page (deleted afterward)
         file_name = 'water.pdf'
-        bar = Bar('Processing', max=page_count)
+        bar = tqdm(total=page_count, desc='pdf', unit='page')
         for i, page_number in enumerate(range(page_count)):
             if str(page_number) in page_list:
                 link = url_list[page_list.index(str(page_number))].split('?')[0]
@@ -136,8 +135,8 @@ def pdf():
                 output_file.addPage(input_page)
                 with open(OUTPUT_PDF_FILE, 'wb') as outputStream:
                     output_file.write(outputStream)
-            bar.next()
-        bar.finish()
+            bar.update(1)
+        bar.close()
     os.remove(file_name)
 
 
@@ -212,6 +211,7 @@ if __name__ == '__main__':
 
     # answer if is update needed?
     if DEBUG or (len(sys.argv) > 1 and sys.argv[1] == 'updated'):
+        from tqdm import tqdm
         config()
         generate_qr()
         if pdf_on:
