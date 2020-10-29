@@ -216,6 +216,7 @@ if __name__ == '__main__':
         generate_qr()
         if pdf_on:
             pdf()
+        input("Press any key to continue . . .")
     else:
         tt = threading.Thread(target=waiting)
         tt.start()
