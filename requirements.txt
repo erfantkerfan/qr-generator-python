@@ -1,7 +1,7 @@
-Pillow~=7.2.0
+Pillow~=8.1.1
 PyPDF4~=1.27.0
 qrcode~=6.1
-reportlab~=3.5.42
-python-dotenv~=0.14.0
+reportlab~=3.5.62
+python-dotenv~=0.15.0
 pick~=1.0.0
-tqdm~=4.49.0
+tqdm~=4.58.0
