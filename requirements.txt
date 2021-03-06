@@ -4,4 +4,4 @@ qrcode~=6.1
 reportlab~=3.5.62
 python-dotenv~=0.15.0
 pick~=1.0.0
-tqdm~=4.58.0
+tqdm~=4.59.0
