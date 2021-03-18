@@ -18,15 +18,17 @@ VERSION = '2.1.0'
 PLACEMENT_OPTIONS = [
     {'name': 'Abrisham', 'dimension': 70, 'width': 0, 'height': 0},
     {'name': 'Fadaee Fard', 'dimension': 70, 'width': 0, 'height': 772},
+    {'name': 'Taftan', 'dimension': 70, 'width': 0, 'height': 0},
     {'name': 'Free', 'dimension': 70, 'width': 0, 'height': 0},
     {'name': 'Letter', 'dimension': 70, 'width': 525, 'height': 772},
     {'name': 'Arash', 'dimension': 65, 'width': 528, 'height': 741},
 ]
 UTM_OPTIONS = [
     {'name': 'None', 'utm_link': ''},
-    {'name': 'abrisham', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=abrisham'},
-    {'name': 'nooshdaru', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=nooshdaru'},
-    {'name': 'arash', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=arash'},
+    {'name': 'Abrisham', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=abrisham'},
+    {'name': 'Taftan', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=taftan'},
+    {'name': 'Nooshdaru', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=nooshdaru'},
+    {'name': 'Arash', 'utm_link': '?utm_source=alaatv&utm_medium=qrCode&utm_campaign=pdf&utm_term=arash'},
 ]
 SIZE_OPTIONS = [20, 5, 50, 100, 200, 300, 400]
 PERCENT_OPTIONS = [35, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
